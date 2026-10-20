@@ -1,1 +1,4 @@
 # The_Ultimate_Game_Of_RK10
+Пока используем библиотеку pygame-ce, мб ещё numpy пригодится
+
+`pip install pygame-ce numpy`
