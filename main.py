@@ -1,12 +1,14 @@
 import pygame, sys, time
 from random import randint
 import config as cfg
+import characters
 
 class Game:
     FPS = 60
     DELTATIME = 1.0 / FPS
     SPAWN = 15
-    WINDOW = pygame.Rect(0, 0, 300, 600)
+    WINDOW = pygame.Rect(0, 0, 1000, 600)
+    all_sprites = pygame.sprite.Group()
     
     def __init__(self) -> None:
         pygame.init()
@@ -15,6 +17,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.counter = 0
+        self.player = characters.Player(self.all_sprites)
     
     def run(self) -> None:
         time_prev = time.time()
@@ -33,10 +36,12 @@ class Game:
                 self.running = False
     
     def update(self) -> None:
-        return 
+        self.all_sprites.update(self.FPS / 1000)
+        
     
     def draw(self) -> None:
         self.screen.fill((255, 255, 255))
+        self.all_sprites.draw(self.screen)
         self.window.flip()        
         
 def main(game: Game) -> None:
