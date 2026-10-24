@@ -1,66 +1,55 @@
-import pygame, sys
+import pygame, sys, time
 from random import randint
+import config as cfg
+import characters
 
-class Circle:
-    GRAVITY = 0.3
+class Game:
+    FPS = 60
+    DELTATIME = 1.0 / FPS
+    SPAWN = 15
+    WINDOW = pygame.Rect(0, 0, 1000, 600)
+    all_sprites = pygame.sprite.Group()
     
-    def __init__(self, pos) -> None:
-        self.pose_x   = pos[0] + randint(-2, 2)
-        self.pose_y   = pos[1] + randint(-2, 2)
-        self.radius   = 2
-        self.color = [randint(0, 255), randint(0, 255), randint(0, 255)]
-        self.speedx   = randint(-10, 10)
-        self.speedy   = randint(-10, 10)
-        self.todelete = False 
+    def __init__(self) -> None:
+        pygame.init()
+        self.window = pygame.Window(size=self.WINDOW.size, title="Game ver 0.0.1")
+        self.screen = self.window.get_surface()
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.counter = 0
+        self.player = characters.Player(self.all_sprites)
     
-    def update(self, window: pygame.Window) -> None:
-        self.speedy += Circle.GRAVITY
-        self.pose_x += self.speedx
-        self.pose_y += self.speedy
-        if (
-            self.pose_x - self.radius < 0 or
-            self.pose_x + self.radius > window.size[0] or
-            self.pose_y + self.radius > window.size[1]
-        ): self.todelete = True
-    
-    def draw(self, screen: pygame.Surface) -> None:
-        pygame.draw.circle(screen, self.color, (self.pose_x, self.pose_y), self.radius)        
-                
-def main():
-    is_running = 1
-    pygame.init()
-    window = pygame.Window(size=(800, 800), title="Test circle faling", position=(10, 50))
-    screen = window.get_surface()
-    
-    clock = pygame.time.Clock()
-    
-    circles = list()
-    
-    while is_running:
+    def run(self) -> None:
+        time_prev = time.time()
+        while self.running:
+            self.watch_for_events()
+            self.update()
+            self.draw()
+            self.clock.tick(self.FPS)
+            time_curr = time.time()
+            self.DELTATIME = time_curr - time_prev
+            time_prev = time_curr
+            
+    def watch_for_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = 0
-        
-        if pygame.mouse.get_pressed()[0]:
-            for i in range(5):
-                circles.append(Circle(pygame.mouse.get_pos()))
-        todelete = list()
-        for p in circles:
-            p.update(window)
-            if p.todelete:
-                todelete.append(p)
-        for p in todelete:
-            circles.remove(p)
-        
-        screen.fill("white")
-        for p in circles:
-            p.draw(screen)
-            
-        window.flip()
-        clock.tick(60)
+                self.running = False
     
+    def update(self) -> None:
+        self.all_sprites.update(self.FPS / 1000)
+        
+    
+    def draw(self) -> None:
+        self.screen.fill((255, 255, 255))
+        self.all_sprites.draw(self.screen)
+        self.window.flip()        
+        
+def main(game: Game) -> None:
+    game.run()
     pygame.quit()
     sys.exit()
+
+if  __name__ == "__main__":
+    game = Game()
+    main(game)
     
-if __name__ == "__main__":
-    main()
