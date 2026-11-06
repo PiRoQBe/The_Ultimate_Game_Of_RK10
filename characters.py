@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(
         self,
         bullet_groups: pygame.sprite.Group[Any],
-        *groups: pygame.sprite.Group[Any],
+        *groups: pygame.sprite.AbstractGroup[Any],
     ) -> None:
         super().__init__(*groups)
 
@@ -22,6 +22,9 @@ class Player(pygame.sprite.Sprite):
 
         self.bullet_groups: pygame.sprite.Group[Any] = bullet_groups
 
+        self.cooldown = 300
+        self.last_shot_time = 0
+
     @override
     def update(self, dt: float) -> None:
         keys = pygame.key.get_pressed()
@@ -29,8 +32,14 @@ class Player(pygame.sprite.Sprite):
         if move.length() > 0:
             self.rect.center += move.normalize() * self.speed * dt
 
+        if keys[pygame.K_SPACE]:
+            cur_time = pygame.time.get_ticks()
+            if cur_time - self.last_shot_time >= self.cooldown:
+                self.last_shot_time = cur_time
+                _bullet = self.shoot()
+
     def shoot(self) -> Bullet:
-        return Bullet(self.get_plater_pos(), self.bullet_groups)
+        return Bullet(self.get_plater_pos(), self.bullet_groups, *self.groups())
 
     def get_plater_pos(self) -> pygame.Vector2:
         return pygame.Vector2(self.rect.center)
@@ -39,7 +48,7 @@ class Player(pygame.sprite.Sprite):
 @final
 class Bullet(pygame.sprite.Sprite):
     def __init__(
-        self, start_pos: pygame.Vector2, *groups: pygame.sprite.Group[Any]
+        self, start_pos: pygame.Vector2, *groups: pygame.sprite.AbstractGroup[Any]
     ) -> None:
         super().__init__(*groups)
 
